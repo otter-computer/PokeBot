@@ -11,10 +11,6 @@
     "dotenv": "^5.0.0",
     "splitargs": "0.0.7"
   },
-  "devDependencies": {
-    "serverless": "^1.28.0",
-    "serverless-s3-sync": "^1.6.1"
-  },
   "engines": {
     "node": "^8.0.0"
   }
