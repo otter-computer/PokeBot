@@ -9,9 +9,14 @@
   "dependencies": {
     "discord.js": "^11.3.0",
     "dotenv": "^5.0.0",
+    "firebase-admin": "^6.1.0",
     "splitargs": "0.0.7"
   },
   "engines": {
     "node": "^8.0.0"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
   }
 }

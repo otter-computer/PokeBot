@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const Discord = require('discord.js');
-const splitargs = require('splitargs');
+const Firebase = require('./Firebase');
+// const splitargs = require('splitargs');
 
 class Bot extends EventEmitter {
   /**
@@ -12,6 +13,7 @@ class Bot extends EventEmitter {
     super();
 
     this.client = new Discord.Client();
+    this.Firebase = new Firebase();
 
     this.bindEvents();
   }
@@ -79,7 +81,9 @@ class Bot extends EventEmitter {
 
     if (Message.mentions.members.has(this.client.user.id)) {
 
-      const command = splitargs(Message.content)[1];
+      // const command = splitargs(Message.content)[1];
+
+      Message.reply('Hello.');
 
       return;
     }
