@@ -1,0 +1,21 @@
+{
+  "name": "pokebot",
+  "version": "1.0.0",
+  "description": "Pokemon Discord bot.",
+  "readme": "README.md",
+  "maintainers": [],
+  "author": "",
+  "license": "GPL-2.0",
+  "dependencies": {
+    "discord.js": "^11.3.0",
+    "dotenv": "^5.0.0",
+    "splitargs": "0.0.7"
+  },
+  "devDependencies": {
+    "serverless": "^1.28.0",
+    "serverless-s3-sync": "^1.6.1"
+  },
+  "engines": {
+    "node": "^8.0.0"
+  }
+}

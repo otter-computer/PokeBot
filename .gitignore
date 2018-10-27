@@ -1,0 +1,15 @@
+# Editor
+.vscode
+
+# Dependencies
+node_modules
+jspm_packages
+
+# Serverless
+.serverless
+
+# Logs
+*.log
+
+# Config
+.env
