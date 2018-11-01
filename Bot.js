@@ -1,7 +1,8 @@
 const EventEmitter = require('events');
 const Discord = require('discord.js');
 const Firebase = require('./Firebase');
-// const splitargs = require('splitargs');
+const PokemonManager = require('./PokemonManager');
+const splitargs = require('splitargs');
 
 class Bot extends EventEmitter {
   /**
@@ -14,6 +15,7 @@ class Bot extends EventEmitter {
 
     this.client = new Discord.Client();
     this.Firebase = new Firebase();
+    this.PokemonManager = new PokemonManager(this.Firebase.database);
 
     this.bindEvents();
   }
@@ -79,14 +81,24 @@ class Bot extends EventEmitter {
       return;
     }
 
-    if (Message.mentions.members.has(this.client.user.id)) {
-
-      // const command = splitargs(Message.content)[1];
-
-      Message.reply('Hello.');
-
+    if (!Message.mentions.members.has(this.client.user.id)) {
       return;
     }
+
+    const User = Message.author;
+    const Guild = Message.guild;
+    // const GuildMember = Message.member;
+    const command = splitargs(Message.content)[1];
+
+    if (command === 'genenc' && this.isStaff(User, Guild)) {
+      this.PokemonManager.generateEncounter();
+      Message.reply('Generating encounter');
+      return;
+    }
+
+    Message.reply('Hello.');
+
+    return;
   }
 
   /**
