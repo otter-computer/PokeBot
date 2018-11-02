@@ -15,7 +15,7 @@ class Bot extends EventEmitter {
 
     this.client = new Discord.Client();
     this.Firebase = new Firebase();
-    this.PokemonManager = new PokemonManager(this.Firebase.database);
+    this.PokemonManager = new PokemonManager(this.client, this.Firebase.database);
 
     this.bindEvents();
   }
@@ -26,6 +26,7 @@ class Bot extends EventEmitter {
   bindEvents() {
     this.client.on('ready', this.onReady.bind(this));
     this.client.on('message', this.onMessage.bind(this));
+    this.client.on('messageReactionAdd', this.onReaction.bind(this));
   }
 
   /**
@@ -75,7 +76,7 @@ class Bot extends EventEmitter {
    * Filters messages from bots & DMs.
    * @param {Message} Message Discord message object that fired the event
    */
-  async onMessage(Message) {
+  onMessage(Message) {
     // Ignore system, bot, DMs
     if (Message.system || Message.author.bot || !(Message.channel instanceof Discord.TextChannel)) {
       return;
@@ -88,17 +89,29 @@ class Bot extends EventEmitter {
     const User = Message.author;
     const Guild = Message.guild;
     // const GuildMember = Message.member;
-    const command = splitargs(Message.content)[1];
 
-    if (command === 'genenc' && this.isStaff(User, Guild)) {
+    const args = splitargs(Message.content);
+    const command = args[1];
+
+    if (command === 'e' && this.isStaff(User, Guild)) {
+
+      if (args.length > 2) {
+        this.PokemonManager.generateEncounter(args[2]);
+        return;
+      }
+
       this.PokemonManager.generateEncounter();
-      Message.reply('Generating encounter');
       return;
     }
+  }
 
-    Message.reply('Hello.');
+  /**
+   * Reaction handler
+   * @param {MessageReaction} MessageReaction The reaction object
+   * @param {User} User The user that applied the emoji or reaction emoji
+   */
+  onReaction(MessageReaction, User) {
 
-    return;
   }
 
   /**
