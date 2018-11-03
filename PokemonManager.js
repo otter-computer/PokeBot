@@ -9,21 +9,25 @@ class PokemonManager {
     this.pokemon = require('./pokemon.json');
     this.client = Client;
     this.database = database;
-    this.currentEncounters = [];
   }
 
   /**
    *
    */
-  catchPokemon(User, pokemonId) {
-
+  catchPokemon(User, Message) {
+    this.database.ref('encounters/' + Message.id).once('value', encounterSnapshot => {
+      const encounter = encounterSnapshot.val();
+      this.database.ref('users/' + User.id + '/' + Message.id).set({
+        pokemon: encounter.pokemon
+      });
+    });
   }
 
   /**
    *
    */
-  endEncounter() {
-
+  endEncounter(messageId) {
+    this.database.ref('encounters/' + messageId).remove();
   }
 
   /**
@@ -34,9 +38,9 @@ class PokemonManager {
     let pokemon;
 
     if (id) {
-      pokemon = this.getPokemon(id);
+      pokemon = this.generatePokemon(id);
     } else {
-      pokemon = this.getPokemon();
+      pokemon = this.generatePokemon();
     }
 
     console.log(pokemon);
@@ -59,10 +63,10 @@ class PokemonManager {
   }
 
   /**
-   * Gets the specified Pokemon, or a random one
+   * Generates the specified Pokemon, or a random one
    * @param {string} [Id] The ID of the pokemon
    */
-  getPokemon(Id) {
+  generatePokemon(Id) {
     let pkmnId = Id;
 
     if (!pkmnId) {
@@ -82,11 +86,16 @@ class PokemonManager {
   }
 
   /**
+   * Save the generated encounter to the database for ez lookup later
    * @param {Message} Message The bot message containing the encounter
    * @param {Object} pokemon The pokemon object inside the message
    */
   saveEncounter(Message, pokemon) {
-
+    this.database.ref('encounters/' + Message.id).set({
+      channelId: Message.channel.id,
+      messageId: Message.id,
+      pokemon: pokemon
+    });
   }
 }
 

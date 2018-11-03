@@ -103,6 +103,11 @@ class Bot extends EventEmitter {
       this.PokemonManager.generateEncounter();
       return;
     }
+
+    if (command === 'pokedex') {
+      console.log('Pokedex');
+      return;
+    }
   }
 
   /**
@@ -111,7 +116,25 @@ class Bot extends EventEmitter {
    * @param {User} User The user that applied the emoji or reaction emoji
    */
   onReaction(MessageReaction, User) {
+    // Ignore message not sent by this bot
+    if (MessageReaction.message.author !== this.client.user) {
+      console.log('Ignoring non-bot message');
+      return;
+    }
 
+    // Ignore bot reactions
+    if (User.bot) {
+      console.log('Ignoring bot reaction');
+      return;
+    }
+
+    // Only act on pokeball emoji
+    if (MessageReaction.emoji.id !== '507711756358123540') {
+      console.log('Ignoring bad reaction');
+      return;
+    }
+
+    this.PokemonManager.catchPokemon(User, MessageReaction.message);
   }
 
   /**
