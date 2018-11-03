@@ -76,7 +76,7 @@ class Bot extends EventEmitter {
    * Filters messages from bots & DMs.
    * @param {Message} Message Discord message object that fired the event
    */
-  onMessage(Message) {
+  async onMessage(Message) {
     // Ignore system, bot, DMs
     if (Message.system || Message.author.bot || !(Message.channel instanceof Discord.TextChannel)) {
       return;
@@ -94,18 +94,26 @@ class Bot extends EventEmitter {
     const command = args[1];
 
     if (command === 'e' && this.isStaff(User, Guild)) {
+      let pokemon;
 
       if (args.length > 2) {
-        this.PokemonManager.generateEncounter(args[2]);
-        return;
+        pokemon = await this.PokemonManager.generateEncounter(args[2]);
+      } else {
+        pokemon = await this.PokemonManager.generateEncounter();
       }
 
-      this.PokemonManager.generateEncounter();
+      this.outputEncounter(pokemon);
       return;
     }
 
     if (command === 'pokedex') {
-      console.log('Pokedex');
+      const pokedex = await this.PokemonManager.getPokedex(Message.author.id);
+      this.outputPokedex(Message, pokedex);
+      return;
+    }
+
+    if (command === 'type') {
+      console.log('Type');
       return;
     }
   }
@@ -147,6 +155,37 @@ class Bot extends EventEmitter {
       '<@' + this.client.user.id + '>' +
       '.'
     );
+  }
+
+  /**
+   * Outputs an encounter to a random
+   * @param {Object} pokemon The pokemon object to generate an encounter for
+   */
+  outputEncounter(pokemon) {
+    const Guild = this.client.guilds.first();
+    const Channel = Guild.channels.filter(channel => channel.type === 'text').random();
+
+    const embed = new Discord.RichEmbed();
+
+    embed.setTitle('A wild ' + pokemon.name + ' has appeared!');
+    embed.setDescription('Throw a Poké Ball to catch it!');
+    embed.setThumbnail('https://gaymers.gg/pkmn-assets/' + pokemon.id + '.png');
+    embed.addField('Types', pokemon.types.join(', '));
+
+    Channel.send(embed).then(Message => {
+      Message.react(Message.guild.emojis.get('507711756358123540'));
+      this.PokemonManager.saveEncounter(Message, pokemon);
+    });
+  }
+
+  /**
+   *
+   * @param {Message} Message The Discord message that requested the pokedex
+   * @param {Object} pokedex The user's pokedex
+   */
+  outputPokedex(Message, pokedex) {
+    console.log(pokedex);
+    // TODO: Format and output pokedex
   }
 }
 

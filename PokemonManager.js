@@ -12,12 +12,14 @@ class PokemonManager {
   }
 
   /**
-   *
+   * Save a pokemon to a user's pokedex in the database
+   * @param {User} User
+   * @param {Message} Message
    */
   catchPokemon(User, Message) {
     this.database.ref('encounters/' + Message.id).once('value', encounterSnapshot => {
       const encounter = encounterSnapshot.val();
-      this.database.ref('users/' + User.id + '/' + Message.id).set({
+      this.database.ref('users/' + User.id + '/pokedex/' + Message.id).set({
         pokemon: encounter.pokemon
       });
     });
@@ -49,31 +51,17 @@ class PokemonManager {
    * @param {string} [id] The ID of the pokemon to generate
    */
   generateEncounter(id) {
-    let pokemon;
+    return new Promise((resolve, reject) => {
+      let pokemon;
 
-    if (id) {
-      pokemon = this.generatePokemon(id);
-    } else {
-      pokemon = this.generatePokemon();
-    }
+      if (id) {
+        pokemon = this.generatePokemon(id);
+      } else {
+        pokemon = this.generatePokemon();
+      }
 
-    console.log(pokemon);
-
-    const Guild = this.client.guilds.first();
-    const Channel = Guild.channels.filter(channel => channel.type === 'text').random();
-
-    const embed = new Discord.RichEmbed();
-
-    embed.setTitle('A wild ' + pokemon.name + ' has appeared!');
-    embed.setDescription('Throw a Poké Ball to catch it!');
-    embed.setThumbnail('https://gaymers.gg/pkmn-assets/' + pokemon.id + '.png');
-    embed.addField('Types', pokemon.types.join(', '));
-
-    Channel.send(embed).then(Message => {
-      Message.react(Message.guild.emojis.get('507711756358123540'));
-      this.saveEncounter(Message, pokemon);
+      resolve(pokemon);
     });
-    return;
   }
 
   /**
@@ -93,10 +81,17 @@ class PokemonManager {
   }
 
   /**
-   *
+   * Get a user's pokedex from the database
+   * @param {string} userId The Discord user ID of the user you want to get the pokedex for
    */
-  outputPokedex() {
-
+  getPokedex(userId) {
+    const pokedexRef = this.database.ref('users/' + userId + '/pokedex');
+    return new Promise((resolve, reject) => {
+      pokedexRef.once('value', pokedexSnapshot => {
+        const pokedex = pokedexSnapshot.val();
+        resolve(pokedex);
+      });
+    });
   }
 
   /**
