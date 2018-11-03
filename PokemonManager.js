@@ -24,10 +24,24 @@ class PokemonManager {
   }
 
   /**
-   *
+   * Ends a pokemon encounter.
+   * Deletes the bot message, removes encounter from database
+   * @param {string} messageId The message ID of the encounter
    */
   endEncounter(messageId) {
-    this.database.ref('encounters/' + messageId).remove();
+    const Guild = this.client.guilds.first();
+
+    this.database.ref('encounters/' + messageId).once('value', encounterSnapshot => {
+      const encounter = encounterSnapshot.val();
+
+      Guild.channels.get(encounter.channelId).then(Channel => {
+        Channel.fetchMessage(messageId).then(Message=> {
+          Message.delete();
+        });
+      });
+
+      this.database.ref('encounters/' + messageId).remove();
+    });
   }
 
   /**
