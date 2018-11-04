@@ -106,14 +106,26 @@ class Bot extends EventEmitter {
       return;
     }
 
-    if (command === 'pokedex') {
-      const pokedex = await this.PokemonManager.getPokedex(Message.author.id);
-      this.outputPokedex(Message, pokedex);
-      return;
+    if (command === 'type') {
+      const allowedTypes = await this.PokemonManager.getAllowedTypes(Message.author.id);
+      // No type specified, so show available types
+      if (args.length <= 2) {
+        if (allowedTypes.length > 0) {
+          Message.reply(
+            'Here\'s the types you can select:\n```' + allowedTypes.join(', ') + '```' +
+            'Set one using `@' + this.client.user.username + ' type ' + allowedTypes[0] + '`'
+          );
+        } else {
+          Message.reply('Sorry, you don\'t have any types you can set :sob: Catch more Pokémon and try again!');
+        }
+        return;
+      }
+
+      this.setType(args[2], allowedTypes, Message);
     }
 
-    if (command === 'type') {
-      console.log('Type');
+    if (command === 'pokedex') {
+      this.outputPokedex(Message);
       return;
     }
   }
@@ -179,13 +191,79 @@ class Bot extends EventEmitter {
   }
 
   /**
-   *
+   * Output's the user's current pokedex
    * @param {Message} Message The Discord message that requested the pokedex
    * @param {Object} pokedex The user's pokedex
    */
-  outputPokedex(Message, pokedex) {
+  async outputPokedex(Message) {
+    const pokedex = await this.PokemonManager.getPokedex(Message.author.id);
     console.log(pokedex);
     // TODO: Format and output pokedex
+  }
+
+  /**
+   * Sets the user's role based on the types of pokemon they have
+   * @param {string} chosenType The type the user wants to set
+   * @param {Array} allowedTypes The types the user is allowed to set
+   */
+  setType(chosenType, allowedTypes, Message) {
+    const chosenTypeLowerCase = chosenType.toLowerCase();
+    const chosenTypeProperCase = this.toProperCase(chosenType);
+
+    const TYPES = [
+      'Normal',
+      'Fire',
+      'Fighting',
+      'Water',
+      'Flying',
+      'Grass',
+      'Poison',
+      'Electric',
+      'Ground',
+      'Psychic',
+      'Rock',
+      'Ice',
+      'Bug',
+      'Dragon',
+      'Ghost',
+      'Dark',
+      'Steel',
+      'Fairy',
+    ];
+
+    if (!allowedTypes.includes(chosenTypeLowerCase)) {
+      Message.reply('Soz, you don\'t have enough Pokémon of that type yet. Go catch some more!');
+      return;
+    }
+
+    const newTypeRole = Message.guild.roles.find('name', chosenTypeProperCase);
+    if (!newTypeRole) {
+      Message.reply('Sorry, I had an issue setting your type. :confounded:');
+      return;
+    }
+
+    if (Message.member.roles.findKey('name', chosenTypeProperCase)) {
+      Message.reply('You\'ve already set your type to that! :confused:');
+      return;
+    }
+
+    const modifiedRoleList = [];
+    Message.member.roles.forEach(existingRole => {
+      if (TYPES.includes(existingRole.name)) {
+        // Filter out any region roles
+        return;
+      }
+      modifiedRoleList.push(existingRole);
+    });
+    modifiedRoleList.push(newTypeRole);
+
+    Message.member.setRoles(modifiedRoleList).then(() => {
+      Message.reply('I\'ve set your new type!');
+    });
+  }
+
+  toProperCase(string) {
+    return string.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
   }
 }
 

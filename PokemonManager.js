@@ -78,6 +78,58 @@ class PokemonManager {
     return pokemon;
   }
 
+  async getAllowedTypes(userId) {
+    const pokedex = await this.getPokedex(userId);
+    const types = await this.getAllTypes(pokedex);
+
+    return new Promise((resolve, reject) => {
+      let allowedTypes = [];
+
+      for (let type in types) {
+        if (types[type] >= 5) {
+          allowedTypes.push(type);
+        }
+      }
+
+      console.log(allowedTypes);
+      resolve(allowedTypes);
+    });
+  }
+
+  getAllTypes(pokedex) {
+    return new Promise((resolve, reject) => {
+      let types = {
+        normal: 0,
+        fire: 0,
+        fighting: 0,
+        water: 0,
+        flying: 0,
+        grass: 0,
+        poison: 0,
+        electric: 0,
+        ground: 0,
+        psychic: 0,
+        rock: 0,
+        ice: 0,
+        bug: 0,
+        dragon: 0,
+        ghost: 0,
+        dark: 0,
+        steel: 0,
+        fairy: 0
+      };
+
+      for (let entry in pokedex) {
+        for (let type in pokedex[entry].pokemon.types) {
+          types[pokedex[entry].pokemon.types[type]]++;
+        }
+      }
+
+      console.log(types);
+      resolve(types);
+    });
+  }
+
   /**
    * Get a user's pokedex from the database
    * @param {string} userId The Discord user ID of the user you want to get the pokedex for
