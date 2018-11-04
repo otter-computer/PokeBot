@@ -10,6 +10,7 @@
     "discord.js": "^11.3.0",
     "dotenv": "^5.0.0",
     "firebase-admin": "^6.1.0",
+    "node-cron": "^2.0.3",
     "splitargs": "0.0.7"
   },
   "engines": {

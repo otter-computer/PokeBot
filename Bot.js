@@ -1,6 +1,7 @@
 require('./Utils');
 const EventEmitter = require('events');
 const Discord = require('discord.js');
+const cron = require('node-cron');
 const Firebase = require('./Firebase');
 const PokemonManager = require('./PokemonManager');
 const splitargs = require('splitargs');
@@ -19,6 +20,11 @@ class Bot extends EventEmitter {
     this.PokemonManager = new PokemonManager(this.client, this.Firebase.database);
 
     this.bindEvents();
+
+    cron.schedule('*/30 * * * *', () => {
+      console.log('Auto-generating encounter');
+      this.generateEncounter();
+    });
   }
 
   /**
@@ -55,6 +61,18 @@ class Bot extends EventEmitter {
     }).first();
 
     return user;
+  }
+
+  async generateEncounter(pokemonId) {
+    let pokemon;
+
+    if (pokemonId) {
+      pokemon = await this.PokemonManager.generateEncounter(pokemonId);
+    } else {
+      pokemon = await this.PokemonManager.generateEncounter();
+    }
+
+    this.outputEncounter(pokemon);
   }
 
   /**
@@ -95,15 +113,12 @@ class Bot extends EventEmitter {
     const command = args[1];
 
     if (command === 'e' && this.isStaff(User, Guild)) {
-      let pokemon;
-
       if (args.length > 2) {
-        pokemon = await this.PokemonManager.generateEncounter(args[2]);
+        this.generateEncounter(args[2]);
       } else {
-        pokemon = await this.PokemonManager.generateEncounter();
+        this.generateEncounter();
       }
 
-      this.outputEncounter(pokemon);
       return;
     }
 
