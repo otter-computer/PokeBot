@@ -1,3 +1,4 @@
+require('./Utils');
 const EventEmitter = require('events');
 const Discord = require('discord.js');
 const Firebase = require('./Firebase');
@@ -106,14 +107,14 @@ class Bot extends EventEmitter {
       return;
     }
 
-    if (command === 'type') {
+    if (command === 'type' || command === 'types') {
       const allowedTypes = await this.PokemonManager.getAllowedTypes(Message.author.id);
       // No type specified, so show available types
       if (args.length <= 2) {
         if (allowedTypes.length > 0) {
           Message.reply(
-            'Here\'s the types you can select:\n```' + allowedTypes.join(', ') + '```' +
-            'Set one using `@' + this.client.user.username + ' type ' + allowedTypes[0] + '`'
+            'Here\'s the types you can select:\n```' + allowedTypes.join(', ').toProperCase() + '```' +
+            'Set one using `@' + this.client.user.username + ' type ' + allowedTypes[0].toProperCase() + '`'
           );
         } else {
           Message.reply('Sorry, you don\'t have any types you can set :sob: Catch more Pokémon and try again!');
@@ -125,7 +126,7 @@ class Bot extends EventEmitter {
     }
 
     if (command === 'pokedex') {
-      this.outputPokedex(Message);
+      // this.outputPokedex(Message);
       return;
     }
   }
@@ -149,7 +150,7 @@ class Bot extends EventEmitter {
     }
 
     // Only act on pokeball emoji
-    if (MessageReaction.emoji.id !== '507711756358123540') {
+    if (MessageReaction.emoji.id !== '507935062457712660') {
       console.log('Ignoring bad reaction');
       return;
     }
@@ -179,13 +180,13 @@ class Bot extends EventEmitter {
 
     const embed = new Discord.RichEmbed();
 
-    embed.setTitle('A wild ' + pokemon.name + ' has appeared!');
+    embed.setTitle('A wild ' + pokemon.name.toProperCase() + ' has appeared!');
     embed.setDescription('Throw a Poké Ball to catch it!');
     embed.setThumbnail('https://gaymers.gg/pkmn-assets/' + pokemon.id + '.png');
-    embed.addField('Types', pokemon.types.join(', '));
+    embed.addField('Types', pokemon.types.join(', ').toProperCase());
 
     Channel.send(embed).then(Message => {
-      Message.react(Message.guild.emojis.get('507711756358123540'));
+      Message.react(Message.guild.emojis.get('507935062457712660'));
       this.PokemonManager.saveEncounter(Message, pokemon);
     });
   }
@@ -208,7 +209,7 @@ class Bot extends EventEmitter {
    */
   setType(chosenType, allowedTypes, Message) {
     const chosenTypeLowerCase = chosenType.toLowerCase();
-    const chosenTypeProperCase = this.toProperCase(chosenType);
+    const chosenTypeProperCase = chosenType.toProperCase();
 
     const TYPES = [
       'Normal',
@@ -228,11 +229,11 @@ class Bot extends EventEmitter {
       'Ghost',
       'Dark',
       'Steel',
-      'Fairy',
+      'Fairy'
     ];
 
     if (!allowedTypes.includes(chosenTypeLowerCase)) {
-      Message.reply('Soz, you don\'t have enough Pokémon of that type yet. Go catch some more!');
+      Message.reply('Sorry, you don\'t have enough Pokémon of that type yet. Go catch some more!');
       return;
     }
 
@@ -260,10 +261,6 @@ class Bot extends EventEmitter {
     Message.member.setRoles(modifiedRoleList).then(() => {
       Message.reply('I\'ve set your new type!');
     });
-  }
-
-  toProperCase(string) {
-    return string.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
   }
 }
 
