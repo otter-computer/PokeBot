@@ -193,7 +193,8 @@ class Bot extends EventEmitter {
    */
   outputEncounter(pokemon) {
     const Guild = this.client.guilds.first();
-    const Channel = Guild.channels.filter(channel => channel.type === 'text').random();
+
+    const Channel = Guild.channels.find(channel => channel.name === 'general');
 
     console.log('Starting encounter in:', Channel.name);
 
