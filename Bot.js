@@ -170,7 +170,7 @@ class Bot extends EventEmitter {
       return;
     }
 
-    console.log(User.username = 'reacted');
+    console.log(User.username + 'reacted');
 
     this.PokemonManager.catchPokemon(User, MessageReaction.message);
   }
@@ -194,7 +194,43 @@ class Bot extends EventEmitter {
   outputEncounter(pokemon) {
     const Guild = this.client.guilds.first();
 
-    const Channel = Guild.channels.find(channel => channel.name === 'general');
+    const channels = [
+      'general',
+      'pc-gaming',
+      'console-gaming',
+      'mobile-gaming',
+      'tabletop-gaming',
+      'lady-talk',
+      'battle-royale',
+      'dead-by-daylight',
+      'final-fantasy',
+      'league-of-legends',
+      'minecraft',
+      'overwatch',
+      'pokemon',
+      'warframe',
+      'world-of-warcraft',
+      'elder-scrolls-online',
+      'selfies',
+      'pets',
+      'fitness',
+      'food',
+      'news-and-politics',
+      'science-and-technology',
+      'philosophy',
+      'language',
+      'streams-and-vids',
+      'tv-movies',
+      'rupauls-drag-race',
+      'anime',
+      'music',
+      'creative',
+      'memes',
+      'bot-room',
+      'voice-chat-channel'
+    ];
+
+    const Channel = Guild.channels.filter(channel => channel.name === channels[Math.floor(Math.random()*channels.length)]);
 
     console.log('Starting encounter in:', Channel.name);
 
