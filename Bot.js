@@ -170,6 +170,8 @@ class Bot extends EventEmitter {
       return;
     }
 
+    console.log(User.username = 'reacted');
+
     this.PokemonManager.catchPokemon(User, MessageReaction.message);
   }
 
