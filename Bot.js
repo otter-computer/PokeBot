@@ -170,7 +170,7 @@ class Bot extends EventEmitter {
       return;
     }
 
-    console.log(User.username + 'reacted');
+    console.log(User.username + ' reacted');
 
     this.PokemonManager.catchPokemon(User, MessageReaction.message);
   }
@@ -230,7 +230,7 @@ class Bot extends EventEmitter {
       'voice-chat-channel'
     ];
 
-    const Channel = Guild.channels.filter(channel => channel.name === channels[Math.floor(Math.random()*channels.length)]);
+    const Channel = Guild.channels.find(channel => channel.name === channels[Math.floor(Math.random()*channels.length)]);
 
     console.log('Starting encounter in:', Channel.name);
 
