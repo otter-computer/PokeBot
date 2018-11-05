@@ -230,7 +230,7 @@ class Bot extends EventEmitter {
       'voice-chat-channel'
     ];
 
-    const Channel = Guild.channels.find(channel => channel.name === channels[Math.floor(Math.random()*channels.length)]);
+    const Channel = Guild.channels.find('name', channels[Math.floor(Math.random()*channels.length)]);
 
     console.log('Starting encounter in:', Channel.name);
 
