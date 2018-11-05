@@ -193,6 +193,8 @@ class Bot extends EventEmitter {
     const Guild = this.client.guilds.first();
     const Channel = Guild.channels.filter(channel => channel.type === 'text').random();
 
+    console.log('Starting encounter in:', Channel.name);
+
     const embed = new Discord.RichEmbed();
 
     embed.setTitle('A wild ' + pokemon.name.toProperCase() + ' has appeared!');
