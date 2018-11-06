@@ -120,6 +120,8 @@ class Bot extends EventEmitter {
     const command = args[1];
 
     if (command === 'e' && this.isStaff(User, Guild)) {
+      this.endLastEncounter();
+
       if (args.length > 2) {
         this.generateEncounter(args[2]);
       } else {
