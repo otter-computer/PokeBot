@@ -22,6 +22,9 @@ class Bot extends EventEmitter {
     this.bindEvents();
 
     cron.schedule('*/30 * * * *', () => {
+      console.log('Ending last encounter');
+      this.endLastEncounter();
+
       console.log('Auto-generating encounter');
       this.generateEncounter();
     });
@@ -49,6 +52,10 @@ class Bot extends EventEmitter {
   destroy() {
     console.log('Bot shutting down.');
     this.client.destroy();
+  }
+
+  endLastEncounter() {
+    this.PokemonManager.endEncounter();
   }
 
   /**
@@ -122,6 +129,11 @@ class Bot extends EventEmitter {
       return;
     }
 
+    if (command === 'end' && this.isStaff(User, Guild)) {
+      this.PokemonManager.endEncounter(args[2]);
+      return;
+    }
+
     if (command === 'type' || command === 'types') {
       const allowedTypes = await this.PokemonManager.getAllowedTypes(Message.author.id);
       // No type specified, so show available types
@@ -141,7 +153,7 @@ class Bot extends EventEmitter {
     }
 
     if (command === 'pokedex') {
-      // this.outputPokedex(Message);
+      this.outputPokedex(Message);
       return;
     }
   }
@@ -254,8 +266,12 @@ class Bot extends EventEmitter {
    */
   async outputPokedex(Message) {
     const pokedex = await this.PokemonManager.getPokedex(Message.author.id);
-    console.log(pokedex);
-    // TODO: Format and output pokedex
+    const types = await this.PokemonManager.getAllTypes(pokedex);
+    Message.reply(
+      '```' +
+      JSON.stringify(types) +
+      '```'
+    );
   }
 
   /**

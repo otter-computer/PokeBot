@@ -17,6 +17,13 @@ class PokemonManager {
   catchPokemon(User, Message) {
     this.database.ref('encounters/' + Message.id).once('value', encounterSnapshot => {
       const encounter = encounterSnapshot.val();
+
+      if (!encounter) {
+        console.log('Encounter expired');
+        Message.delete();
+        return;
+      }
+
       this.database.ref('users/' + User.id + '/pokedex/' + Message.id).set({
         pokemon: encounter.pokemon
       });
@@ -26,21 +33,30 @@ class PokemonManager {
   /**
    * Ends a pokemon encounter.
    * Deletes the bot message, removes encounter from database
-   * @param {string} messageId The message ID of the encounter
    */
-  endEncounter(messageId) {
-    const Guild = this.client.guilds.first();
+  endEncounter() {
+    this.database.ref('lastEncounter').once('value', lastEncounterSnapshot => {
+      const lastEncounter = lastEncounterSnapshot.val();
+      const messageId = lastEncounter.lastEncounter;
 
-    this.database.ref('encounters/' + messageId).once('value', encounterSnapshot => {
-      const encounter = encounterSnapshot.val();
+      console.log('Ending encounter', messageId);
 
-      Guild.channels.get(encounter.channelId).then(Channel => {
-        Channel.fetchMessage(messageId).then(Message=> {
-          Message.delete();
-        });
+      const Guild = this.client.guilds.first();
+
+      this.database.ref('encounters/' + messageId).once('value', encounterSnapshot => {
+        const encounter = encounterSnapshot.val();
+
+        if (encounter) {
+          const Channel = Guild.channels.get(encounter.channelId);
+
+          Channel.fetchMessage(messageId).then(Message=> {
+            if (Message) Message.delete();
+          });
+        }
+
+
+        this.database.ref('encounters/' + messageId).remove();
       });
-
-      this.database.ref('encounters/' + messageId).remove();
     });
   }
 
@@ -154,6 +170,10 @@ class PokemonManager {
       channelId: Message.channel.id,
       messageId: Message.id,
       pokemon: pokemon
+    });
+
+    this.database.ref('lastEncounter').set({
+      lastEncounter: Message.id
     });
   }
 }
